@@ -1,4 +1,30 @@
+spring:
+  profiles:
+    active: dev
+---
+# 开发环境
+spring:
+  profiles: dev
 server:
   port: 8082
+  servlet:
+    encoding:
+      charset: UTF-8
+      force: true
+      enabled: true
+# 配置api文件路径(注意更改路径为'/')
+sd:
+  api: http://localhost:7860
+---
+# 生产环境
+spring:
+  profiles: pro
+server:
+  port: 80
+  servlet:
+    encoding:
+      charset: UTF-8
+      force: true
+      enabled: true
 sd:
   api: http://localhost:7860

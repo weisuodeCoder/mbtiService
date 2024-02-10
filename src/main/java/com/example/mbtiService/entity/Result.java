@@ -3,6 +3,7 @@ package com.example.mbtiService.entity;
 import lombok.Builder;
 import lombok.Data;
 
+import java.io.Serializable;
 import java.util.Map;
 
 /**
@@ -17,8 +18,7 @@ import java.util.Map;
  * }
  */
 @Data
-@Builder
-public class Result {
+public class Result implements Serializable {
     private boolean success; // 是否成功
     private Integer code; // 返回码
     private String message; // 返回信息

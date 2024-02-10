@@ -4,6 +4,7 @@ import com.example.mbtiService.entity.Result;
 import com.example.mbtiService.entity.ResultCode;
 import com.example.mbtiService.service.Text2ImgService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -18,10 +19,9 @@ public class Text2ImgController {
 
     @RequestMapping("/text2Img")
     @ResponseBody
+    @Scope("prototype")
     public Result text2Img(@RequestBody Map<String, Object> map) throws IOException {
-        System.out.println(map);
         String prompt = (String) map.get("prompt");
-        System.out.println(prompt);
         final List<String> images = text2ImgService.generateImages(prompt);
         final Result result = new Result(ResultCode.SUCCESS, images);
         return result;

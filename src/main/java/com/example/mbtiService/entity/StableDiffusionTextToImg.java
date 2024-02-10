@@ -200,4 +200,8 @@ public class StableDiffusionTextToImg implements Serializable {
      */
     private Boolean save_images;
 
+    /**
+     * 默认 {}
+     */
+    private AlwaysonScripts alwayson_scripts;
 }

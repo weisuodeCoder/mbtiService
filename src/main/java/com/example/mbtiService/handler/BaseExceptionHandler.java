@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.client.ResourceAccessException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -24,15 +25,23 @@ public class BaseExceptionHandler {
     @ExceptionHandler(ArithmeticException.class)
     @ResponseBody
     public Result zeroError(HttpServletRequest req, HttpServletResponse res, ArithmeticException e) {
-        Result result = new Result(ResultCode.FAIL, e.getMessage());
+        Result result = new Result(ResultCode.FAIL, "服务繁忙，请稍后再试");
         printLog(e, "除零异常");
+        return result;
+    }
+
+    @ExceptionHandler(ResourceAccessException.class)
+    @ResponseBody
+    public Result resourceError(HttpServletRequest req,HttpServletResponse res, Exception e) {
+        Result result = new Result(ResultCode.FAIL, "服务繁忙，请稍后再试");
+        printLog(e, "资源访问异常");
         return result;
     }
 
     @ExceptionHandler(Exception.class) // 指定处理什么样的异常
     @ResponseBody
     public Result error(HttpServletRequest req, HttpServletResponse res, Exception e) {
-        Result result = new Result(ResultCode.SERVER_ERROR, e.getMessage());
+        Result result = new Result(ResultCode.SERVER_ERROR, "服务繁忙，请稍后再试");
         printLog(e, "系统异常");
         return result;
     }

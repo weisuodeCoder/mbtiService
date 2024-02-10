@@ -2,9 +2,8 @@ package com.example.mbtiService.service;
 
 import com.alibaba.fastjson.JSONObject;
 import com.example.mbtiService.config.StableDiffusionConfig;
-import com.example.mbtiService.entity.OverrideSettings;
-import com.example.mbtiService.entity.StableDiffusionTextToImg;
-import com.example.mbtiService.entity.StableDiffusionTextToImgResponse;
+import com.example.mbtiService.entity.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -12,12 +11,14 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.assertj.core.util.Lists;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 
 @Service
+@Slf4j
 public class Text2ImgService {
     @Autowired
     StableDiffusionConfig stableDiffusionConfig;
@@ -32,7 +33,7 @@ public class Text2ImgService {
     public List<String> generateImages(String prompt)  throws IOException {
         StableDiffusionTextToImg body = getArtisticWordStableDiffusionTextToImg(prompt);
         StableDiffusionTextToImgResponse stableDiffusionTextToImgResponse = callSdApi(body);
-        final List<String> images = stableDiffusionTextToImgResponse.getImages();
+        List<String> images = stableDiffusionTextToImgResponse.getImages();
         return images;
     }
 
@@ -40,13 +41,11 @@ public class Text2ImgService {
      * @description: 构造sd请求体
      * @author: zhiqiang
      * @date: 2024/2/9 21:51
-     * @param: []
+     * @param: String prompt
      * @return: com.example.mbtiService.entity.StableDiffusionTextToImg
      **/
     private StableDiffusionTextToImg getArtisticWordStableDiffusionTextToImg(String prompt) throws IOException {
-
-        String vae = "vaeFtMse840000EmaPruned_vae.safetensors";
-        StableDiffusionTextToImg body = StableDiffusionTextToImg.builder()
+        final StableDiffusionTextToImg body = StableDiffusionTextToImg.builder()
                 .sampler_name("")
                 .prompt("<lora:MBTI-charaters:0.8>,"+prompt)
                 .negative_prompt("EasyNegative, paintings, sketches, lowres, normal quality, skin spots, acnes, skin blemishes, age spot, glans,extra fingers,fewer fingers,strange fingers,bad hand,backlight, watermark, logo, bad anatomy,lace,rabbit,back,")
@@ -61,10 +60,27 @@ public class Text2ImgService {
                 .steps(28)
                 .override_settings(OverrideSettings.builder()
                         .sd_model_checkpoint("darkSushiMixMix_225D.safetensors")
-                        .sd_vae(vae)
+                        .sd_vae("vaeFtMse840000EmaPruned_vae.safetensors")
                         .build())
+                .alwayson_scripts(getAlwaysonScripts())
                 .cfg_scale(7.0).build();
         return body;
+    }
+
+    /**
+     * @description: 获取拓展预设【人脸修复】
+     * @author: zhiqiang
+     * @date: 2024/2/10 19:00
+     * @return: com.example.mbtiService.entity.AlwaysonScripts
+     **/
+    private AlwaysonScripts getAlwaysonScripts() {
+        Args args1 = Args.builder().ad_model("person_yolov8n-seg.pt").build();
+        Args args2 = Args.builder().ad_model("face_yolov8n_v2.pt").ad_prompt("detail face").build();
+        Args args3 = Args.builder().ad_model("hand_yolov8n.pt").build();
+        List<Args> args = Lists.newArrayList(args1, args2, args3);
+        ADetailer aDetailer = ADetailer.builder().args(args).build();
+        AlwaysonScripts alwaysonScripts = AlwaysonScripts.builder().aDetailer(aDetailer).build();
+        return alwaysonScripts;
     }
 
     /**
@@ -85,14 +101,21 @@ public class Text2ImgService {
         return stableDiffusionTextToImgResponse;
     }
 
+    /**
+     * @description: 获取调用stable diffusion的返回值
+     * @author: zhiqiang
+     * @date: 2024/2/10 19:07
+     * @param: [response]
+     * @return: com.example.mbtiService.entity.StableDiffusionTextToImgResponse
+     **/
     private StableDiffusionTextToImgResponse handleResponse(ResponseEntity<JSONObject> response) {
         if (Objects.isNull(response) || !response.getStatusCode().is2xxSuccessful()) {
-            System.out.println("call stable diffusion api status code: {}"+JSONObject.toJSONString(response));
+            log.warn("调用stable diffusion api状态码为: {}",JSONObject.toJSONString(response));
         }
 
         final JSONObject body = response.getBody();
         if (Objects.isNull(body)) {
-            System.out.println("send request failed. response body is empty");
+            log.error("发送请求失败。响应正文为空");
         }
         return body.toJavaObject(StableDiffusionTextToImgResponse.class);
     }

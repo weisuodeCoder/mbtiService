@@ -15,6 +15,14 @@ server:
 # 配置api文件路径(注意更改路径为'/')
 sd:
   api: http://localhost:7860
+logLocation: E:/logs/mbti
+pay:
+  baseUrl: https://pay.lanfucai.com
+  pid: 2792
+  notifyUrl: http://www.pay.com/notify_url.php
+  signType: MD5
+  device: wechat
+  key: zjqer1jmH9O11hOmJG1QEHejEm4m3CJz
 ---
 # 生产环境
 spring:
@@ -27,4 +35,12 @@ server:
       force: true
       enabled: true
 sd:
-  api: http://localhost:7860
+  api: http://sd-fc-stabion-plus-rcqfgbjsmz.cn-shanghai-vpc.fcapp.run
+logLocation: logs/mbti
+pay:
+  baseUrl: https://pay.lanfucai.com
+  pid: 2792
+  notifyUrl: http://www.pay.com/notify_url.php
+  signType: MD5
+  device: wechat
+  key: zjqer1jmH9O11hOmJG1QEHejEm4m3CJz

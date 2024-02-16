@@ -22,6 +22,13 @@ import javax.servlet.http.HttpServletResponse;
 @ControllerAdvice
 public class BaseExceptionHandler {
 
+    @ExceptionHandler(IllegalAccessException.class)
+    @ResponseBody
+    public Result illegalAccessError(HttpServletRequest req, HttpServletResponse res, ArithmeticException e) {
+        Result result = new Result(ResultCode.FAIL, "服务繁忙，请稍后再试");
+        printLog(e, "类成员访问权限异常");
+        return result;
+    }
     @ExceptionHandler(ArithmeticException.class)
     @ResponseBody
     public Result zeroError(HttpServletRequest req, HttpServletResponse res, ArithmeticException e) {
